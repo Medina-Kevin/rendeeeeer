@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MutantServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MutantePrueba</a> &gt; <a href="index.source.html" class="el_package">com.example.MutantePrueba.services</a> &gt; <span class="el_source">MutantServiceImpl.java</span></div><h1>MutantServiceImpl.java</h1><pre class="source lang-java linenums">package com.example.MutantePrueba.services;
+
+import com.example.MutantePrueba.repositories.DnaRepository;
+import com.example.MutantePrueba.entity.Dna;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L9">public class MutantServiceImpl implements MutantService {</span>
+
+    @Autowired
+    private DnaRepository dnaRepository;
+
+    @Override
+    public boolean isMutant(String[] dna) {
+        //Aqui si nos ingresan una matriz nula devolverÃ¡ falso
+<span class="fc bfc" id="L17" title="All 2 branches covered.">        if (dna == null) {</span>
+<span class="fc" id="L18">            return false;</span>
+        }
+        // Convertimos el array en una matriz
+<span class="fc" id="L21">        char[][] matrizz = convertiraMatriz(dna);</span>
+
+        // Verificar si la matriz es de NxN
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (!esMatrizNxN(matrizz)) {</span>
+<span class="fc" id="L25">            System.out.println(&quot;La matriz debe ser de NxN.&quot;);</span>
+<span class="fc" id="L26">            return false;</span>
+        }
+
+        // Detectaremos si es un mutante usando un contador
+<span class="fc" id="L30">        int n = matrizz.length;</span>
+<span class="fc" id="L31">        int contadorLetras = 0;</span>
+
+        // Verificamos todas las filas
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            if (verificarFila(matrizz, i, 1, matrizz[i][0], 1)) {</span>
+<span class="fc" id="L36">                contadorLetras++;</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">                if (contadorLetras &gt; 1) {</span>
+<span class="nc" id="L38">                    guardarDNA(dna, true);</span>
+<span class="nc" id="L39">                    return true;</span>
+                }
+            }
+        }
+
+        // Verificamos todas las columnas
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (int j = 0; j &lt; n; j++) {</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            if (verificarColumna(matrizz, 1, j, matrizz[0][j], 1)) {</span>
+<span class="fc" id="L47">                contadorLetras++;</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">                if (contadorLetras &gt; 1) {</span>
+<span class="fc" id="L49">                    guardarDNA(dna, true);</span>
+<span class="fc" id="L50">                    return true;</span>
+                }
+            }
+        }
+
+        // Verificar diagonal principal
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        for (int i = 0; i &lt; n - 3; i++) {</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            for (int j = 0; j &lt; n - 3; j++) {</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">                if (verificarDiagonalPrincipal(matrizz, i, j, matrizz[i][j], 1)) {</span>
+<span class="fc" id="L59">                    contadorLetras++;</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                    if (contadorLetras &gt; 1) {</span>
+<span class="nc" id="L61">                        guardarDNA(dna, true);</span>
+<span class="nc" id="L62">                        return true;</span>
+                    }
+                }
+            }
+        }
+
+        // Verificar contradiagonal
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for (int i = 0; i &lt; n - 3; i++) {</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            for (int j = 3; j &lt; n; j++) {</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">                if (verificarContradiagonal(matrizz, i, j, matrizz[i][j], 1)) {</span>
+<span class="nc" id="L72">                    contadorLetras++;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">                    if (contadorLetras &gt; 1) {</span>
+<span class="nc" id="L74">                        guardarDNA(dna, true);</span>
+<span class="nc" id="L75">                        return true;</span>
+                    }
+                }
+            }
+        }
+
+<span class="fc" id="L81">        guardarDNA(dna, false);</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        return contadorLetras &gt; 1;</span>
+    }
+
+    // Aqui guardaremos los DNA en la base de datos
+    private void guardarDNA(String[] dna, boolean isMutant) {
+<span class="fc" id="L87">        String sequence = String.join(&quot;&quot;, dna);</span>
+<span class="fc" id="L88">        Dna dnaEntity = new Dna(sequence, isMutant);</span>
+<span class="fc" id="L89">        dnaRepository.save(dnaEntity);</span>
+<span class="fc" id="L90">    }</span>
+
+    // Metodo para convertir strings a matriz
+    private char[][] convertiraMatriz(String[] dna) {
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (dna == null) {</span>
+<span class="nc" id="L95">            return null;</span>
+        }
+<span class="fc" id="L97">        int n = dna.length;</span>
+<span class="fc" id="L98">        char[][] matrizz = new char[n][n];</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L100">            matrizz[i] = dna[i].toCharArray();</span>
+        }
+<span class="fc" id="L102">        return matrizz;</span>
+    }
+
+    //Metodo para saber si es una matriz de NxN
+    private boolean esMatrizNxN(char[][] matriz) {
+<span class="fc" id="L107">        int n = matriz.length;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            if (matriz[i].length != n) {</span>
+<span class="fc" id="L110">                return false;</span>
+            }
+        }
+<span class="fc" id="L113">        return true;</span>
+    }
+
+    // Metodo para verificar las filas
+    private boolean verificarFila(char[][] dnaMatrix, int fila, int columna, char letraAnterior, int contadorConsecutivas) {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (columna &gt;= dnaMatrix.length) {</span>
+<span class="fc" id="L119">            return false;</span>
+        }
+
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        if (dnaMatrix[fila][columna] == letraAnterior) {</span>
+<span class="fc" id="L123">            contadorConsecutivas++;</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (contadorConsecutivas == 4) {</span>
+<span class="fc" id="L125">                return true;</span>
+            }
+        } else {
+<span class="fc" id="L128">            contadorConsecutivas = 1;</span>
+<span class="fc" id="L129">            letraAnterior = dnaMatrix[fila][columna];</span>
+        }
+
+<span class="fc" id="L132">        return verificarFila(dnaMatrix, fila, columna + 1, letraAnterior, contadorConsecutivas);</span>
+    }
+
+    // Metodo para verificar las columnas
+    private boolean verificarColumna(char[][] dnaMatrix, int fila, int columna, char letraAnterior, int contadorConsecutivas) {
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (fila &gt;= dnaMatrix.length) {</span>
+<span class="fc" id="L138">            return false;</span>
+        }
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (dnaMatrix[fila][columna] == letraAnterior) {</span>
+<span class="fc" id="L141">            contadorConsecutivas++;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">            if (contadorConsecutivas == 4) {</span>
+<span class="fc" id="L143">                return true;</span>
+            }
+        } else {
+<span class="fc" id="L146">            contadorConsecutivas = 1;</span>
+<span class="fc" id="L147">            letraAnterior = dnaMatrix[fila][columna];</span>
+        }
+<span class="fc" id="L149">        return verificarColumna(dnaMatrix, fila + 1, columna, letraAnterior, contadorConsecutivas);</span>
+    }
+
+    // Metodo para verificar la diagonal principal de la matriz
+    private boolean verificarDiagonalPrincipal(char[][] dnaMatrix, int fila, int columna, char letraAnterior, int contadorConsecutivas) {
+<span class="fc bfc" id="L154" title="All 4 branches covered.">        if (fila &gt;= dnaMatrix.length || columna &gt;= dnaMatrix.length) {</span>
+<span class="fc" id="L155">            return false;</span>
+        }
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (dnaMatrix[fila][columna] == letraAnterior) {</span>
+<span class="fc" id="L158">            contadorConsecutivas++;</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">            if (contadorConsecutivas == 4) {</span>
+<span class="fc" id="L160">                return true;</span>
+            }
+        } else {
+<span class="fc" id="L163">            contadorConsecutivas = 1;</span>
+<span class="fc" id="L164">            letraAnterior = dnaMatrix[fila][columna];</span>
+        }
+<span class="fc" id="L166">        return verificarDiagonalPrincipal(dnaMatrix, fila + 1, columna + 1, letraAnterior, contadorConsecutivas);</span>
+    }
+
+    // Metodo para verificar la contradiagonal de la matriz
+    private boolean verificarContradiagonal(char[][] dnaMatrix, int fila, int columna, char letraAnterior, int contadorConsecutivas) {
+<span class="fc bfc" id="L171" title="All 4 branches covered.">        if (fila &gt;= dnaMatrix.length || columna &lt; 0) {</span>
+<span class="fc" id="L172">            return false;</span>
+        }
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (dnaMatrix[fila][columna] == letraAnterior) {</span>
+<span class="fc" id="L175">            contadorConsecutivas++;</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">            if (contadorConsecutivas == 4) {</span>
+<span class="nc" id="L177">                return true;</span>
+            }
+        } else {
+<span class="fc" id="L180">            contadorConsecutivas = 1;</span>
+<span class="fc" id="L181">            letraAnterior = dnaMatrix[fila][columna];</span>
+        }
+<span class="fc" id="L183">        return verificarContradiagonal(dnaMatrix, fila + 1, columna - 1, letraAnterior, contadorConsecutivas);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
